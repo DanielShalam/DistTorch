@@ -31,7 +31,7 @@ def parse_args():
                         help="""(KNN) Number of neighbours. """)
     parser.add_argument('--temperature', default=1., type=float,
                         help="""(KNN) Divide the similarities before making them probabilities. """)
-    parser.add_argument('--init_method', default=20, type=int, choices=["random", "uniform_assign"],
+    parser.add_argument('--init_method', default="random", type=int, choices=["random", "uniform_assign"],
                         help="""(K-means) Centroids initialization. """)
 
     # Misc
