@@ -12,7 +12,7 @@ def is_distributed():
     return dist.is_available() and dist.is_initialized()
 
 
-def init_distributed_mode(args):
+def init_distributed(args):
     args.is_slurm_job = "SLURM_JOB_ID" in os.environ
 
     if 'SLURM_PROCID' in os.environ or args.is_slurm_job:
@@ -56,22 +56,31 @@ def get_algorithm(args):
     if 'knn' in args.algorithm:
         return KNN(algorithm=args.algorithm, pairwise_metric=args.pairwise_metric, k=args.k,
                    batch_size=args.batch_size, num_classes=args.num_classes, temperature=args.temperature)
+    if 'kmeans' in args.algorithm:
+        return KNN(algorithm=args.algorithm, pairwise_metric=args.pairwise_metric, k=args.k,
+                   batch_size=args.batch_size, num_classes=args.num_classes, temperature=args.temperature)
     else:
         print(f"Error: {args.algorithm} unavailable unavailable for now. ")
         exit()
 
 
-def load_data(args):
+def load_data(args, requires_split: bool):
     """
-    Load data.
+    Load data. Only support .py files for now.
     """
     suffix = args.path_train_features.split('.')[-1]
     if suffix == 'pt':
         train_features = torch.load(args.path_train_features).cuda(non_blocking=True)
         train_labels = torch.load(args.path_train_labels).cuda(non_blocking=True)
+
         # split train data among gpus
         if args.split_to_gpus:
-            train_data, train_labels = split_to_gpus(train_features, train_labels, shuffle=args.shuffle)
+            train_features, train_labels = split_to_gpus(train_features, train_labels, shuffle=args.shuffle)
+
+        if not requires_split:
+            print(
+                f"Data loaded successfully with {train_features.shape[0]} local samples of dim {train_features.shape[1]}")
+            return train_features, train_labels
 
         test_features = test_labels = None
         if args.path_test is not None:
