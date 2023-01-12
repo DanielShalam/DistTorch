@@ -3,6 +3,6 @@
  
  ### Disributed Algorithms:
 - [x] KNN
-- [ ] K-means
+- [x] K-means
 - [ ] Sinkhorn
 - [ ] SVD ?
